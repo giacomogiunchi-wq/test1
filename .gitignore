@@ -1,0 +1,6 @@
+node_modules
+pnpm-lock.yaml
+apps/*/node_modules
+apps/*/dist
+apps/server/data
+.DS_Store
