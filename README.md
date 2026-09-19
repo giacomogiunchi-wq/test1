@@ -11,11 +11,16 @@ ctest --test-dir build --output-on-failure
 ./build/duomec_feature_framework_benchmark
 ./build/duomec_geometry_quality_benchmark
 ./build/duomec_discrete_geometry_benchmark
+./build/duomec_large_assembly_baseline
 ```
 
 This dependency-light configuration exercises the domain transaction contract,
 including 20-step undo/redo and semantic save/reload through the in-memory test
 store. It does not masquerade as an OCAF integration test.
+
+Large-assembly development currently stops at M5.1A: reusable instrumentation,
+Chrome Trace export, and deterministic LA-01–LA-07 workload specifications. It
+does not yet contain an assembly runtime or make renderer-performance claims.
 
 ## Build the OCAF Milestone 1A integration
 

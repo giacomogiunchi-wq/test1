@@ -32,6 +32,15 @@ target_include_directories(duomec_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_
 target_compile_features(duomec_core PUBLIC cxx_std_20)
 duomec_enable_warnings(duomec_core)
 
+add_library(duomec_runtime_instrumentation
+  src/runtime/performance.cpp
+  src/runtime/benchmark_corpus.cpp)
+add_library(Duomec::RuntimeInstrumentation ALIAS duomec_runtime_instrumentation)
+target_include_directories(duomec_runtime_instrumentation PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+target_link_libraries(duomec_runtime_instrumentation PUBLIC Duomec::Core)
+target_compile_features(duomec_runtime_instrumentation PUBLIC cxx_std_20)
+duomec_enable_warnings(duomec_runtime_instrumentation)
+
 add_library(duomec_cad_document
   src/cad/document/ids.cpp
   src/cad/document/memory_document_store.cpp
@@ -127,6 +136,11 @@ if(BUILD_TESTING AND DUOMEC_BUILD_TESTS)
   target_compile_definitions(duomec_discrete_geometry_tests PRIVATE DUOMEC_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
   target_link_libraries(duomec_discrete_geometry_tests PRIVATE Duomec::NativeDiscreteAdapter)
   add_test(NAME duomec.discrete_geometry.unit COMMAND duomec_discrete_geometry_tests)
+  add_executable(duomec_runtime_instrumentation_tests tests/unit/runtime_instrumentation_tests.cpp)
+  target_link_libraries(duomec_runtime_instrumentation_tests PRIVATE Duomec::RuntimeInstrumentation)
+  add_test(NAME duomec.runtime_instrumentation.unit COMMAND duomec_runtime_instrumentation_tests)
+  add_executable(duomec_large_assembly_baseline tests/benchmarks/large_assembly_baseline.cpp)
+  target_link_libraries(duomec_large_assembly_baseline PRIVATE Duomec::RuntimeInstrumentation)
   add_executable(duomec_discrete_geometry_benchmark tests/benchmarks/discrete_geometry_benchmark.cpp)
   target_link_libraries(duomec_discrete_geometry_benchmark PRIVATE Duomec::NativeDiscreteAdapter)
   if(DUOMEC_ENABLE_OCAF)
