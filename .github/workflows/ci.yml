@@ -1,0 +1,10 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  core:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B build -DDUOMEC_BUILD_DESKTOP=OFF -DDUOMEC_BUILD_TESTS=ON
+      - run: cmake --build build --parallel
+      - run: ctest --test-dir build --output-on-failure
