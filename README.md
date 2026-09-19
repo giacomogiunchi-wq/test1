@@ -1,6 +1,6 @@
 # Duomec Platform
 
-Duomec is an open-source, modular mechanical CAD/CAE application. This repository currently contains **Milestone 0 only**: stable native interfaces, core infrastructure, and an optional Qt 6/Open CASCADE desktop shell that displays and selects topology on a box.
+Duomec is an open-source, modular mechanical CAD/CAE application. This repository contains the Milestone 0 shell and **Milestone 1A only**: the parametric document aggregate, persistent identities, transaction policy, and optional OCAF binary document adapter. Sketching and solid features intentionally remain unimplemented until 1A is verified with the pinned OCCT dependency.
 
 ## Build the CI-friendly core
 
@@ -9,6 +9,24 @@ cmake -S . -B build -DDUOMEC_BUILD_DESKTOP=OFF
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
+
+This dependency-light configuration exercises the domain transaction contract,
+including 20-step undo/redo and semantic save/reload through the in-memory test
+store. It does not masquerade as an OCAF integration test.
+
+## Build the OCAF Milestone 1A integration
+
+With OCCT 8.x installed at the pinned integration baseline:
+
+```bash
+cmake -S . -B build-ocaf -DDUOMEC_ENABLE_OCAF=ON
+cmake --build build-ocaf --parallel
+ctest --test-dir build-ocaf --output-on-failure
+```
+
+The additional integration test creates a body and generic feature, persists
+their UUIDs and SI parameter to a binary `.duomec` file, reopens it, and checks
+OCAF-backed undo/redo.
 
 ## Build the desktop acceptance slice
 
@@ -28,4 +46,7 @@ The viewport displays an OCCT box. Drag the middle button to pan, Shift+left-dra
 * Third-party engines exist only behind adapters; public interfaces use Duomec domain types.
 * Later milestones are intentionally represented by empty package boundaries and disabled feature flags—not partial implementations.
 
-See [`docs/architecture/architecture-brief.md`](docs/architecture/architecture-brief.md), [`docs/architecture/component-diagram.md`](docs/architecture/component-diagram.md), and [`docs/adr`](docs/adr).
+See [`docs/architecture/m1-ocaf-schema.md`](docs/architecture/m1-ocaf-schema.md),
+[`docs/architecture/m1-component-diagram.md`](docs/architecture/m1-component-diagram.md),
+[`docs/milestones/M1_CHECKLIST.md`](docs/milestones/M1_CHECKLIST.md), and
+[`docs/adr`](docs/adr).
