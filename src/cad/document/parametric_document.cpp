@@ -93,7 +93,15 @@ ParametricDocument::add_generic_feature(BodyId body_id, std::string name) {
     return core::Result<FeatureId>::failure({core::ErrorCode::invalid_argument,
                                              "feature name must not be empty",
                                              {}});
-  Feature feature{FeatureId::generate(), std::move(name)};
+  Feature feature{FeatureId::generate(),
+                  std::move(name),
+                  FeatureType::generic,
+                  true,
+                  {},
+                  {},
+                  FeatureExecutionStatus::not_executed,
+                  RecomputeState::clean,
+                  {}};
   const FeatureId id = feature.id;
   auto result = mutate([&](DocumentSnapshot &snapshot) {
     auto body = std::ranges::find(snapshot.bodies, body_id, &Body::id);

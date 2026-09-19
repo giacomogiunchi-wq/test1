@@ -176,7 +176,14 @@ public:
           return core::Result<DocumentSnapshot>::failure(feature_id.error());
         cad::Feature feature{
             feature_id.value(),
-            get_name(feature_label.FindChild(3, Standard_False))};
+            get_name(feature_label.FindChild(3, Standard_False)),
+            cad::FeatureType::generic,
+            true,
+            {},
+            {},
+            cad::FeatureExecutionStatus::not_executed,
+            cad::RecomputeState::clean,
+            {}};
         Handle(TDataStd_Integer) enabled;
         Handle(TDataStd_Integer) state;
         Handle(TDataStd_Integer) execution;

@@ -1,6 +1,6 @@
 # Duomec Platform
 
-Duomec is an open-source, modular mechanical CAD/CAE application. This repository contains the Milestone 0 shell and **Milestone 1A only**: the parametric document aggregate, persistent identities, transaction policy, and optional OCAF binary document adapter. Sketching and solid features intentionally remain unimplemented until 1A is verified with the pinned OCCT dependency.
+Duomec is an open-source, modular mechanical CAD/CAE application. This repository contains the Milestone 0 shell, the Milestone 1A document foundation, and the dependency-free **Milestone 2A unified feature interaction framework**. The repository does not yet contain the assumed Milestone 1 sketch, recompute, topological-resolution, or solid-feature implementations; that prerequisite gap is documented rather than hidden.
 
 ## Build the CI-friendly core
 
@@ -8,6 +8,7 @@ Duomec is an open-source, modular mechanical CAD/CAE application. This repositor
 cmake -S . -B build -DDUOMEC_BUILD_DESKTOP=OFF
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
+./build/duomec_feature_framework_benchmark
 ```
 
 This dependency-light configuration exercises the domain transaction contract,
@@ -46,7 +47,11 @@ The viewport displays an OCCT box. Drag the middle button to pan, Shift+left-dra
 * Third-party engines exist only behind adapters; public interfaces use Duomec domain types.
 * Later milestones are intentionally represented by empty package boundaries and disabled feature flags—not partial implementations.
 
-See [`docs/architecture/m1-ocaf-schema.md`](docs/architecture/m1-ocaf-schema.md),
+See [`docs/milestones/M2_PREFLIGHT.md`](docs/milestones/M2_PREFLIGHT.md),
+[`docs/architecture/m2a-feature-framework.md`](docs/architecture/m2a-feature-framework.md),
+[`docs/architecture/m2-component-diagram.md`](docs/architecture/m2-component-diagram.md),
+[`docs/milestones/M2_CHECKLIST.md`](docs/milestones/M2_CHECKLIST.md),
+[`docs/architecture/m1-ocaf-schema.md`](docs/architecture/m1-ocaf-schema.md),
 [`docs/architecture/m1-component-diagram.md`](docs/architecture/m1-component-diagram.md),
 [`docs/milestones/M1_CHECKLIST.md`](docs/milestones/M1_CHECKLIST.md), and
 [`docs/adr`](docs/adr).

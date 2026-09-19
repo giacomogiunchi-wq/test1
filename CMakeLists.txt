@@ -15,6 +15,14 @@ option(DUOMEC_ENABLE_CHRONO "Enable the Project Chrono adapter (future milestone
 option(DUOMEC_ENABLE_VTK "Enable VTK post-processing (future milestone)" OFF)
 option(DUOMEC_ENABLE_DEM "Enable the experimental LAMMPS DEM adapter" OFF)
 
+function(duomec_enable_warnings target)
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /W4 /permissive-)
+  else()
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
+  endif()
+endfunction()
+
 add_library(duomec_core
   src/core/command.cpp
   src/core/log.cpp
@@ -22,11 +30,7 @@ add_library(duomec_core
 add_library(Duomec::Core ALIAS duomec_core)
 target_include_directories(duomec_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_compile_features(duomec_core PUBLIC cxx_std_20)
-if(MSVC)
-  target_compile_options(duomec_core PRIVATE /W4 /permissive-)
-else()
-  target_compile_options(duomec_core PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
-endif()
+duomec_enable_warnings(duomec_core)
 
 add_library(duomec_cad_document
   src/cad/document/ids.cpp
@@ -36,6 +40,15 @@ add_library(Duomec::CadDocument ALIAS duomec_cad_document)
 target_include_directories(duomec_cad_document PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_link_libraries(duomec_cad_document PUBLIC Duomec::Core)
 target_compile_features(duomec_cad_document PUBLIC cxx_std_20)
+duomec_enable_warnings(duomec_cad_document)
+
+add_library(duomec_cad_features
+  src/cad/features/feature_framework.cpp)
+add_library(Duomec::CadFeatures ALIAS duomec_cad_features)
+target_include_directories(duomec_cad_features PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+target_link_libraries(duomec_cad_features PUBLIC Duomec::CadDocument)
+target_compile_features(duomec_cad_features PUBLIC cxx_std_20)
+duomec_enable_warnings(duomec_cad_features)
 
 if(DUOMEC_ENABLE_OCAF)
   find_package(OpenCASCADE 8.0 REQUIRED)
@@ -73,6 +86,11 @@ if(BUILD_TESTING AND DUOMEC_BUILD_TESTS)
   add_executable(duomec_document_tests tests/unit/document_tests.cpp)
   target_link_libraries(duomec_document_tests PRIVATE Duomec::CadDocument)
   add_test(NAME duomec.document.unit COMMAND duomec_document_tests)
+  add_executable(duomec_feature_framework_tests tests/unit/feature_framework_tests.cpp)
+  target_link_libraries(duomec_feature_framework_tests PRIVATE Duomec::CadFeatures)
+  add_test(NAME duomec.feature_framework.unit COMMAND duomec_feature_framework_tests)
+  add_executable(duomec_feature_framework_benchmark tests/benchmarks/feature_framework_benchmark.cpp)
+  target_link_libraries(duomec_feature_framework_benchmark PRIVATE Duomec::CadFeatures)
   if(DUOMEC_ENABLE_OCAF)
     add_executable(duomec_ocaf_integration_tests tests/integration/ocaf_document_tests.cpp)
     target_link_libraries(duomec_ocaf_integration_tests PRIVATE Duomec::OcafAdapter)
