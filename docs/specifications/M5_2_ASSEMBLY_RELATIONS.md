@@ -1,4 +1,3 @@
-[duomec_codex_milestone_5_2_revision_2.md](https://github.com/user-attachments/files/32425509/duomec_codex_milestone_5_2_revision_2.md)
 # Duomec Platform — Codex Prompt for Milestone 5.2 — Revision 2
 ## Assembly Relations, Quick Mates, Component Lifecycle, Constraint Solving and Motion/CAE-Ready Semantics
 
