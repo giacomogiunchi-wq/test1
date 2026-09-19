@@ -18,6 +18,9 @@ Versions are exact integration baselines, not floating minimums. Updates require
 | VTK | 9.4.2 | embedded result visualization | M3 |
 | ParaView | 5.13.3 | reference/advanced postprocessing | M3 |
 | LAMMPS | 22 Jul 2025 stable | later GRANULAR adapter | post-MVP |
+| Open3D | 0.19.0 candidate; revalidate before enabling | primary mesh/scan processing adapter | M4, disabled |
+| PCL | 1.15.1 candidate; component audit required | optional scan segmentation adapter | M4, disabled |
+| Analysis Situs open core | exact commit pending license/API spike | optional B-Rep recognizer reference/adapter | M4, disabled |
 
 PlaneGCS is deliberately not treated as a stable library API. The M1 spike must select and record a FreeCAD commit, extract the smallest buildable source set, and test numerical behavior before its option can be enabled. Solver executables are runtime integrations: adapters must detect versions and reject incompatible majors.
 

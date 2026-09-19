@@ -59,6 +59,24 @@ target_link_libraries(duomec_geometry_quality PUBLIC Duomec::Core)
 target_compile_features(duomec_geometry_quality PUBLIC cxx_std_20)
 duomec_enable_warnings(duomec_geometry_quality)
 
+add_library(duomec_discrete_geometry
+  src/cad/discrete/discrete_geometry.cpp
+  src/cad/discrete/discrete_codec.cpp)
+add_library(Duomec::DiscreteGeometry ALIAS duomec_discrete_geometry)
+target_include_directories(duomec_discrete_geometry PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+target_link_libraries(duomec_discrete_geometry PUBLIC Duomec::CadDocument Duomec::GeometryQuality)
+target_compile_features(duomec_discrete_geometry PUBLIC cxx_std_20)
+duomec_enable_warnings(duomec_discrete_geometry)
+
+add_library(duomec_native_discrete_adapter
+  src/adapters/discrete/native_discrete_kernel.cpp)
+add_library(Duomec::NativeDiscreteAdapter ALIAS duomec_native_discrete_adapter)
+target_include_directories(duomec_native_discrete_adapter
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/adapters/discrete>)
+target_link_libraries(duomec_native_discrete_adapter PUBLIC Duomec::DiscreteGeometry)
+target_compile_features(duomec_native_discrete_adapter PUBLIC cxx_std_20)
+duomec_enable_warnings(duomec_native_discrete_adapter)
+
 if(DUOMEC_ENABLE_OCAF)
   find_package(OpenCASCADE 8.0 REQUIRED)
   add_library(duomec_ocaf_adapter src/adapters/ocaf/ocaf_document_store.cpp)
@@ -105,6 +123,12 @@ if(BUILD_TESTING AND DUOMEC_BUILD_TESTS)
   add_test(NAME duomec.geometry_quality.unit COMMAND duomec_geometry_quality_tests)
   add_executable(duomec_geometry_quality_benchmark tests/benchmarks/geometry_quality_benchmark.cpp)
   target_link_libraries(duomec_geometry_quality_benchmark PRIVATE Duomec::GeometryQuality)
+  add_executable(duomec_discrete_geometry_tests tests/unit/discrete_geometry_tests.cpp)
+  target_compile_definitions(duomec_discrete_geometry_tests PRIVATE DUOMEC_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+  target_link_libraries(duomec_discrete_geometry_tests PRIVATE Duomec::NativeDiscreteAdapter)
+  add_test(NAME duomec.discrete_geometry.unit COMMAND duomec_discrete_geometry_tests)
+  add_executable(duomec_discrete_geometry_benchmark tests/benchmarks/discrete_geometry_benchmark.cpp)
+  target_link_libraries(duomec_discrete_geometry_benchmark PRIVATE Duomec::NativeDiscreteAdapter)
   if(DUOMEC_ENABLE_OCAF)
     add_executable(duomec_ocaf_integration_tests tests/integration/ocaf_document_tests.cpp)
     target_link_libraries(duomec_ocaf_integration_tests PRIVATE Duomec::OcafAdapter)

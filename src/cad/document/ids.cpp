@@ -66,5 +66,9 @@ template class PersistentId<SketchEntityIdTag>;
 template class PersistentId<ConstraintIdTag>;
 template class PersistentId<ParameterIdTag>;
 template class PersistentId<TopologyReferenceIdTag>;
+template class PersistentId<MeshBodyIdTag>;
+template class PersistentId<PointCloudBodyIdTag>;
+template class PersistentId<DiscreteFeatureIdTag>;
+template class PersistentId<DiscreteRegionIdTag>;
 
 } // namespace duomec::cad

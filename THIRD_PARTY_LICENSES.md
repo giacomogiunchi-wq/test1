@@ -17,5 +17,9 @@ This is an inventory, not legal advice. Binary distributions must include the ex
 | VTK | BSD-3-Clause | https://vtk.org/ |
 | ParaView | BSD-3-Clause | https://www.paraview.org/ |
 | LAMMPS | GPL-2.0 | https://www.lammps.org/ |
+| Open3D | MIT | https://github.com/isl-org/Open3D |
+| PCL | BSD-3-Clause family; audit bundled components | https://github.com/PointCloudLibrary/pcl |
+| Analysis Situs open core | component-level audit required before enablement | https://github.com/txemendes/AnalysisSitus |
+| CGAL | package-specific GPL/commercial; excluded from the core | https://www.cgal.org/ |
 
 Duomec is GPL-3.0. Copyleft engines are kept behind adapter/process boundaries where technically appropriate; redistribution obligations still require release-by-release review. LAMMPS GRANULAR is explicitly post-MVP and cannot become a required dependency.

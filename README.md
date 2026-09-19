@@ -1,6 +1,6 @@
 # Duomec Platform
 
-Duomec is an open-source, modular mechanical CAD/CAE application. This repository contains the Milestone 0 shell, the Milestone 1A document foundation, and the dependency-free **Milestone 2A unified feature interaction framework**, and the **Milestone 3A geometry-law and quality-measurement foundation**. The repository does not yet contain the assumed Milestone 1 sketch, recompute, topological-resolution, or solid-feature implementations; that prerequisite gap is documented rather than hidden.
+Duomec is an open-source, modular mechanical CAD/CAE application. This repository contains the Milestone 0 shell, the Milestone 1A document foundation, and the dependency-free **Milestone 2A unified feature interaction framework**, and the **Milestone 3A geometry-law and quality-measurement foundation**, and the **Milestone 4A discrete mesh/scan foundation**. The repository does not yet contain the assumed Milestone 1 sketch, recompute, topological-resolution, or solid-feature implementations; that prerequisite gap is documented rather than hidden.
 
 ## Build the CI-friendly core
 
@@ -10,6 +10,7 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ./build/duomec_feature_framework_benchmark
 ./build/duomec_geometry_quality_benchmark
+./build/duomec_discrete_geometry_benchmark
 ```
 
 This dependency-light configuration exercises the domain transaction contract,
@@ -48,7 +49,11 @@ The viewport displays an OCCT box. Drag the middle button to pan, Shift+left-dra
 * Third-party engines exist only behind adapters; public interfaces use Duomec domain types.
 * Later milestones are intentionally represented by empty package boundaries and disabled feature flags—not partial implementations.
 
-See [`docs/milestones/M3_PREFLIGHT.md`](docs/milestones/M3_PREFLIGHT.md),
+See [`docs/milestones/M4_PREFLIGHT.md`](docs/milestones/M4_PREFLIGHT.md),
+[`docs/architecture/m4a-discrete-geometry.md`](docs/architecture/m4a-discrete-geometry.md),
+[`docs/licenses/THIRD_PARTY_GEOMETRY.md`](docs/licenses/THIRD_PARTY_GEOMETRY.md),
+[`docs/milestones/M4_CHECKLIST.md`](docs/milestones/M4_CHECKLIST.md),
+[`docs/milestones/M3_PREFLIGHT.md`](docs/milestones/M3_PREFLIGHT.md),
 [`docs/architecture/m3a-geometry-quality.md`](docs/architecture/m3a-geometry-quality.md),
 [`docs/milestones/M3_CHECKLIST.md`](docs/milestones/M3_CHECKLIST.md),
 [`docs/milestones/M2_PREFLIGHT.md`](docs/milestones/M2_PREFLIGHT.md),
