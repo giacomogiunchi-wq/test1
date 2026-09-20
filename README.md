@@ -86,3 +86,10 @@ interactive insertion, replacement diagnostics, embedded virtual definitions,
 atomic external extraction, hierarchy formation, copy-on-write independence,
 per-occurrence mobility/solve mode, Mate References, and smart-insertion state.
 It does not add advanced or mechanical mates.
+
+Step 5.2.4 completes the domain-owned advanced and mechanical relation
+vocabulary, localized structural diagnostics, explicit reference repair,
+metadata-only relation navigation, and confirmation-gated kinematic joint
+recognition. It does not implement multibody dynamics, FEM solving, or claim
+that the dependency-free structural backend is a production nonlinear solver;
+see `docs/milestones/M5_2_4_REPORT.md`.

@@ -169,7 +169,22 @@ enum class RelationType {
   Tangent,
   Lock,
   Frame,
-  Insert
+  Insert,
+  LimitDistance,
+  LimitAngle,
+  LinearCoupler,
+  Path,
+  ProfileCenter,
+  Symmetric,
+  Width,
+  Cam,
+  Gear,
+  Hinge,
+  RackPinion,
+  Screw,
+  Slot,
+  UniversalJoint,
+  BeltChain
 };
 enum class RelationState {
   Active,
@@ -179,7 +194,10 @@ enum class RelationState {
   Conflicting,
   NeedsReview,
   DanglingReference,
-  Incompatible
+  Incompatible,
+  Solved,
+  Underconstrained,
+  SolverFailed
 };
 struct RelationEndpoint {
   cad::RelationEndpointId id{cad::RelationEndpointId::generate()};

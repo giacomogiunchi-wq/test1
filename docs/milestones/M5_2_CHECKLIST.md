@@ -22,8 +22,16 @@
 - [x] Lightweight Mate References and smart-insertion preview/commit.
 - [x] Lifecycle persistence, undo/redo, regression tests, and performance baseline.
 
+## Step 5.2.4 — advanced/mechanical relations and diagnostics
+
+- [x] Semantic advanced relations with limits, modes, stable frames, and path parameters.
+- [x] Mechanical relation records with ratios, directions, phases, offsets, and motion intent.
+- [x] Distinct diagnostics, localized known conflict sets, and explicit reference repair.
+- [x] Metadata-only relation views/browser and confirmation-gated joint recognition.
+- [x] Persistence, history, closed-loop graph, regression tests, and diagnostics benchmark.
+
 ## Later steps
 
-- [ ] Step 5.2.4 and later advanced/mechanical mates and production runtime/UI integrations.
+- [ ] Production nonlinear backend, viewport glyph/overlay integration, multibody dynamics, and FEM conversion.
 
-Stop after Step 5.2.3 pending review.
+Stop after Step 5.2.4 pending review.

@@ -32,6 +32,24 @@ std::size_t constrainedCount(const AssemblyRelation &relation) {
         found != relation.parameters.end())
       return std::get<bool>(found->second) ? 6 : 5;
     return 5;
+  case RelationType::LimitDistance:
+  case RelationType::LimitAngle:
+  case RelationType::LinearCoupler:
+  case RelationType::Symmetric:
+  case RelationType::Width:
+  case RelationType::Cam:
+  case RelationType::Gear:
+  case RelationType::RackPinion:
+  case RelationType::BeltChain:
+    return 1;
+  case RelationType::Path:
+  case RelationType::ProfileCenter:
+  case RelationType::Hinge:
+  case RelationType::Screw:
+  case RelationType::Slot:
+    return 5;
+  case RelationType::UniversalJoint:
+    return 4;
   case RelationType::Parallel:
     return 2;
   case RelationType::Distance:
