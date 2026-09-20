@@ -80,3 +80,9 @@ relation semantics, descriptor-based Quick Mate controller state, and
 transform-only manipulation. The dependency-free native backend currently
 provides DOF/consistency classification rather than a general nonlinear
 geometric solve; see `docs/milestones/M5_2_2_REPORT.md`.
+
+Step 5.2.3 adds the metadata-only component lifecycle layer: default and
+interactive insertion, replacement diagnostics, embedded virtual definitions,
+atomic external extraction, hierarchy formation, copy-on-write independence,
+per-occurrence mobility/solve mode, Mate References, and smart-insertion state.
+It does not add advanced or mechanical mates.

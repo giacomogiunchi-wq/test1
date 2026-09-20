@@ -53,7 +53,8 @@ duomec_enable_warnings(duomec_cad_document)
 
 add_library(duomec_assembly_relations
   src/assembly/relations.cpp
-  src/assembly/constraint_runtime.cpp)
+  src/assembly/constraint_runtime.cpp
+  src/assembly/lifecycle.cpp)
 add_library(Duomec::AssemblyRelations ALIAS duomec_assembly_relations)
 target_include_directories(duomec_assembly_relations PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_link_libraries(duomec_assembly_relations PUBLIC Duomec::CadDocument)
@@ -154,8 +155,13 @@ if(BUILD_TESTING AND DUOMEC_BUILD_TESTS)
   add_executable(duomec_assembly_constraint_runtime_tests tests/unit/assembly_constraint_runtime_tests.cpp)
   target_link_libraries(duomec_assembly_constraint_runtime_tests PRIVATE Duomec::AssemblyRelations)
   add_test(NAME duomec.assembly_constraint_runtime.unit COMMAND duomec_assembly_constraint_runtime_tests)
+  add_executable(duomec_assembly_lifecycle_tests tests/unit/assembly_lifecycle_tests.cpp)
+  target_link_libraries(duomec_assembly_lifecycle_tests PRIVATE Duomec::AssemblyRelations)
+  add_test(NAME duomec.assembly_lifecycle.unit COMMAND duomec_assembly_lifecycle_tests)
   add_executable(duomec_assembly_solver_benchmark tests/benchmarks/assembly_solver_benchmark.cpp)
   target_link_libraries(duomec_assembly_solver_benchmark PRIVATE Duomec::AssemblyRelations Duomec::RuntimeInstrumentation)
+  add_executable(duomec_assembly_lifecycle_benchmark tests/benchmarks/assembly_lifecycle_benchmark.cpp)
+  target_link_libraries(duomec_assembly_lifecycle_benchmark PRIVATE Duomec::AssemblyRelations Duomec::RuntimeInstrumentation)
   add_executable(duomec_large_assembly_baseline tests/benchmarks/large_assembly_baseline.cpp)
   target_link_libraries(duomec_large_assembly_baseline PRIVATE Duomec::RuntimeInstrumentation)
   add_executable(duomec_discrete_geometry_benchmark tests/benchmarks/discrete_geometry_benchmark.cpp)

@@ -176,7 +176,10 @@ enum class RelationState {
   Suppressed,
   Unresolved,
   Redundant,
-  Conflicting
+  Conflicting,
+  NeedsReview,
+  DanglingReference,
+  Incompatible
 };
 struct RelationEndpoint {
   cad::RelationEndpointId id{cad::RelationEndpointId::generate()};

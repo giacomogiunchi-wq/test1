@@ -132,7 +132,7 @@ SolveResult NativeAssemblyConstraintSolver::solve(
                                  : DofState::floating());
   }
   for (const auto &relation : relations) {
-    if (relation.state == RelationState::Suppressed)
+    if (relation.state != RelationState::Active)
       continue;
     const auto structural = relationKey(relation, false);
     const auto complete = relationKey(relation, true);
