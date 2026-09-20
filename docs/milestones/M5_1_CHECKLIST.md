@@ -1,6 +1,6 @@
 # Milestone 5.1 implementation checklist
 
-## M5.1A — Instrumentation and corpus (this change)
+## M5.1A — Instrumentation and corpus
 
 - [x] Thread-safe performance recorder and RAII spans.
 - [x] Deterministic median/p95/p99/max summaries.
@@ -11,10 +11,15 @@
 - [x] Tests and instrumentation/corpus benchmark.
 
 ## M5.1B — Definition/revision/occurrence runtime
-- [ ] Immutable definitions/revisions, occurrence graph, hierarchy, and invalidation domains.
+- [x] Immutable definitions/revisions, occurrence graph, hierarchy, and invalidation domains.
+- [x] Strong hash roles, body revision identities, copy-on-write contracts, and M5.2 command integration.
+- [x] Repeated-occurrence tests and 10k/50k runtime benchmark.
 
 ## M5.1C — Container and local cache
-- [ ] Chunked authoritative prototype, asset cache, SQLite catalog, raw/zstd decision data.
+- [x] Chunked authoritative part/assembly containers with bounded random access and CRC32.
+- [x] Persistent M5.1B registry, occurrence graph, M5.2 relations, and virtual-definition metadata.
+- [x] Atomic save, optional zstd codec, disposable content-addressed cache, and catalog boundary.
+- [x] In-memory catalog plus build-gated SQLite adapter and storage/cache benchmarks.
 
 ## M5.1D — Residency and progressive open
 - [ ] Scheduler, budgets, FIRST_USEFUL/INTERACTION_READY, prewarming.
@@ -37,4 +42,4 @@
 ## M5.1J — Regression gates
 - [ ] Reference hardware tiers and validated performance envelopes.
 
-Stop after M5.1A. No assembly runtime or optimization is claimed.
+Stop after M5.1C. No residency, scheduling, rendering, or later runtime phase is claimed.

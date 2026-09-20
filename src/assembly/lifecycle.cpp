@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
+#include <type_traits>
 
 namespace duomec::assembly {
 namespace {
@@ -272,6 +273,48 @@ core::Result<ReplacementReport> ReplaceComponentCommand::execute(
   return core::Result<ReplacementReport>::success(std::move(report));
 }
 
+core::Result<std::vector<InvalidationEvent>> ReplaceComponentCommand::execute(
+    AssemblyRuntimeGraph &graph, std::span<const cad::OccurrenceId> selected,
+    const CommittedDefinitionRef &replacement, bool replaceAllInstances) const {
+  std::vector<cad::OccurrenceId> targets(selected.begin(), selected.end());
+  if (replaceAllInstances) {
+    std::vector<CommittedDefinitionRef> originals;
+    for (const auto &id : selected) {
+      const auto *occurrence = graph.find(id);
+      if (!occurrence)
+        return core::Result<std::vector<InvalidationEvent>>::failure(
+            {core::ErrorCode::invalid_argument, "selected occurrence missing",
+             id.value()});
+      originals.push_back(occurrence->reference);
+    }
+    // Runtime IDs are intentionally opaque; traverse hierarchy from roots.
+    std::vector<cad::OccurrenceId> pending = graph.childrenOf(std::nullopt);
+    while (!pending.empty()) {
+      const auto id = pending.back();
+      pending.pop_back();
+      const auto *occurrence = graph.find(id);
+      if (occurrence &&
+          std::find(originals.begin(), originals.end(),
+                    occurrence->reference) != originals.end() &&
+          std::find(targets.begin(), targets.end(), id) == targets.end())
+        targets.push_back(id);
+      const auto children = graph.childrenOf(id);
+      pending.insert(pending.end(), children.begin(), children.end());
+    }
+  }
+  std::vector<InvalidationEvent> events;
+  events.reserve(targets.size());
+  for (const auto &id : targets) {
+    auto changed = graph.replaceReference(id, replacement);
+    if (!changed)
+      return core::Result<std::vector<InvalidationEvent>>::failure(
+          changed.error());
+    events.push_back(std::move(changed.value()));
+  }
+  return core::Result<std::vector<InvalidationEvent>>::success(
+      std::move(events));
+}
+
 ComponentDefinition VirtualComponentCommands::newPart(std::string name) const {
   ComponentDefinition value;
   value.kind = DefinitionKind::Part;
@@ -438,6 +481,92 @@ MakeIndependentCommand::execute(AssemblyLifecycleSnapshot &snapshot,
     result.push_back(clone.id);
   }
   return core::Result<std::vector<DefinitionId>>::success(std::move(result));
+}
+
+core::Result<std::vector<CommittedDefinitionRef>>
+MakeIndependentCommand::execute(
+    DefinitionRegistry &registry, AssemblyRuntimeGraph &graph,
+    std::span<const cad::OccurrenceId> selected) const {
+  if (&graph.registry() != &registry)
+    return core::Result<std::vector<CommittedDefinitionRef>>::failure(
+        {core::ErrorCode::invalid_argument, "registry does not own graph",
+         "MakeIndependentCommand"});
+  for (const auto &id : selected)
+    if (!graph.find(id))
+      return core::Result<std::vector<CommittedDefinitionRef>>::failure(
+          {core::ErrorCode::invalid_argument, "occurrence missing",
+           id.value()});
+  std::vector<CommittedDefinitionRef> created;
+  created.reserve(selected.size());
+  for (const auto &id : selected) {
+    const auto sourceReference = graph.find(id)->reference;
+    CommittedDefinitionRef newReference = sourceReference;
+    const auto copied = std::visit(
+        [&](const auto &source) -> core::Result<bool> {
+          using Reference = std::decay_t<decltype(source)>;
+          if constexpr (std::is_same_v<Reference, PartDefinitionRef>) {
+            const auto definition =
+                registry.partDefinition(source.definitionId);
+            const auto revision = registry.partRevision(source.revisionId);
+            if (!definition || !revision)
+              return core::Result<bool>::failure(
+                  {core::ErrorCode::invalid_argument, "source revision missing",
+                   id.value()});
+            PartDefinition cloneDefinition = *definition;
+            cloneDefinition.id = cad::PartDefinitionId::generate();
+            PartRevision cloneRevision = *revision;
+            cloneRevision.id = cad::PartRevisionId::generate();
+            cloneRevision.definitionId = cloneDefinition.id;
+            cloneDefinition.defaultRevision = cloneRevision.id;
+            if (!registry.addPartDefinition(cloneDefinition) ||
+                !registry.commitPartRevision(cloneRevision))
+              return core::Result<bool>::failure(
+                  {core::ErrorCode::internal, "cannot commit independent part",
+                   id.value()});
+            auto reference =
+                registry.reference(cloneDefinition.id, cloneRevision.id);
+            if (!reference)
+              return core::Result<bool>::failure(reference.error());
+            newReference = reference.value();
+          } else {
+            const auto definition =
+                registry.assemblyDefinition(source.definitionId);
+            const auto revision = registry.assemblyRevision(source.revisionId);
+            if (!definition || !revision)
+              return core::Result<bool>::failure(
+                  {core::ErrorCode::invalid_argument, "source revision missing",
+                   id.value()});
+            AssemblyDefinition cloneDefinition = *definition;
+            cloneDefinition.id = cad::AssemblyDefinitionId::generate();
+            AssemblyRevision cloneRevision = *revision;
+            cloneRevision.id = cad::AssemblyRevisionId::generate();
+            cloneRevision.definitionId = cloneDefinition.id;
+            cloneDefinition.defaultRevision = cloneRevision.id;
+            if (!registry.addAssemblyDefinition(cloneDefinition) ||
+                !registry.commitAssemblyRevision(cloneRevision))
+              return core::Result<bool>::failure(
+                  {core::ErrorCode::internal,
+                   "cannot commit independent assembly", id.value()});
+            auto reference =
+                registry.reference(cloneDefinition.id, cloneRevision.id);
+            if (!reference)
+              return core::Result<bool>::failure(reference.error());
+            newReference = reference.value();
+          }
+          return core::Result<bool>::success(true);
+        },
+        sourceReference);
+    if (!copied)
+      return core::Result<std::vector<CommittedDefinitionRef>>::failure(
+          copied.error());
+    const auto replaced = graph.replaceReference(id, newReference);
+    if (!replaced)
+      return core::Result<std::vector<CommittedDefinitionRef>>::failure(
+          replaced.error());
+    created.push_back(std::move(newReference));
+  }
+  return core::Result<std::vector<CommittedDefinitionRef>>::success(
+      std::move(created));
 }
 
 core::Result<bool> setPlacementMobility(AssemblyLifecycleSnapshot &s,

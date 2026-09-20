@@ -15,6 +15,8 @@ option(DUOMEC_ENABLE_OPENFOAM "Enable the OpenFOAM adapter (future milestone)" O
 option(DUOMEC_ENABLE_CHRONO "Enable the Project Chrono adapter (future milestone)" OFF)
 option(DUOMEC_ENABLE_VTK "Enable VTK post-processing (future milestone)" OFF)
 option(DUOMEC_ENABLE_DEM "Enable the experimental LAMMPS DEM adapter" OFF)
+option(DUOMEC_ENABLE_ZSTD "Enable per-chunk zstd compression" OFF)
+option(DUOMEC_ENABLE_SQLITE_CACHE "Enable the SQLite local cache catalog" OFF)
 
 function(duomec_enable_warnings target)
   if(MSVC)
@@ -55,6 +57,7 @@ duomec_enable_warnings(duomec_cad_document)
 add_library(duomec_assembly_relations
   src/assembly/relations.cpp
   src/assembly/constraint_runtime.cpp
+  src/assembly/runtime_model.cpp
   src/assembly/lifecycle.cpp
   src/assembly/advanced_relations.cpp
   src/assembly/analysis_compilers.cpp)
@@ -63,6 +66,28 @@ target_include_directories(duomec_assembly_relations PUBLIC $<BUILD_INTERFACE:${
 target_link_libraries(duomec_assembly_relations PUBLIC Duomec::CadDocument)
 target_compile_features(duomec_assembly_relations PUBLIC cxx_std_20)
 duomec_enable_warnings(duomec_assembly_relations)
+
+add_library(duomec_storage
+  src/storage/container.cpp
+  src/storage/model_persistence.cpp
+  src/storage/local_cache.cpp)
+if(DUOMEC_ENABLE_SQLITE_CACHE)
+  find_package(SQLite3 REQUIRED)
+  target_sources(duomec_storage PRIVATE src/adapters/sqlite/sqlite_cache_catalog.cpp)
+  target_link_libraries(duomec_storage PRIVATE SQLite::SQLite3)
+  target_compile_definitions(duomec_storage PUBLIC DUOMEC_ENABLE_SQLITE_CACHE=1)
+endif()
+if(DUOMEC_ENABLE_ZSTD)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(ZSTD REQUIRED IMPORTED_TARGET libzstd)
+  target_link_libraries(duomec_storage PRIVATE PkgConfig::ZSTD)
+  target_compile_definitions(duomec_storage PUBLIC DUOMEC_ENABLE_ZSTD=1)
+endif()
+add_library(Duomec::Storage ALIAS duomec_storage)
+target_include_directories(duomec_storage PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+target_link_libraries(duomec_storage PUBLIC Duomec::AssemblyRelations)
+target_compile_features(duomec_storage PUBLIC cxx_std_20)
+duomec_enable_warnings(duomec_storage)
 
 add_library(duomec_cad_features
   src/cad/features/feature_framework.cpp)
@@ -161,6 +186,12 @@ if(BUILD_TESTING AND DUOMEC_BUILD_TESTS)
   add_executable(duomec_assembly_lifecycle_tests tests/unit/assembly_lifecycle_tests.cpp)
   target_link_libraries(duomec_assembly_lifecycle_tests PRIVATE Duomec::AssemblyRelations)
   add_test(NAME duomec.assembly_lifecycle.unit COMMAND duomec_assembly_lifecycle_tests)
+  add_executable(duomec_assembly_runtime_model_tests tests/unit/assembly_runtime_model_tests.cpp)
+  target_link_libraries(duomec_assembly_runtime_model_tests PRIVATE Duomec::AssemblyRelations)
+  add_test(NAME duomec.assembly_runtime_model.unit COMMAND duomec_assembly_runtime_model_tests)
+  add_executable(duomec_storage_tests tests/unit/storage_tests.cpp)
+  target_link_libraries(duomec_storage_tests PRIVATE Duomec::Storage Threads::Threads)
+  add_test(NAME duomec.storage.unit COMMAND duomec_storage_tests)
   add_executable(duomec_advanced_relations_tests tests/unit/advanced_relations_tests.cpp)
   target_link_libraries(duomec_advanced_relations_tests PRIVATE Duomec::AssemblyRelations)
   add_test(NAME duomec.advanced_relations.unit COMMAND duomec_advanced_relations_tests)
@@ -173,6 +204,10 @@ if(BUILD_TESTING AND DUOMEC_BUILD_TESTS)
   target_link_libraries(duomec_assembly_solver_benchmark PRIVATE Duomec::AssemblyRelations Duomec::RuntimeInstrumentation)
   add_executable(duomec_assembly_lifecycle_benchmark tests/benchmarks/assembly_lifecycle_benchmark.cpp)
   target_link_libraries(duomec_assembly_lifecycle_benchmark PRIVATE Duomec::AssemblyRelations Duomec::RuntimeInstrumentation)
+  add_executable(duomec_assembly_runtime_model_benchmark tests/benchmarks/assembly_runtime_model_benchmark.cpp)
+  target_link_libraries(duomec_assembly_runtime_model_benchmark PRIVATE Duomec::AssemblyRelations Duomec::RuntimeInstrumentation)
+  add_executable(duomec_storage_benchmark tests/benchmarks/storage_benchmark.cpp)
+  target_link_libraries(duomec_storage_benchmark PRIVATE Duomec::Storage Duomec::RuntimeInstrumentation)
   add_executable(duomec_relation_diagnostics_benchmark tests/benchmarks/relation_diagnostics_benchmark.cpp)
   target_link_libraries(duomec_relation_diagnostics_benchmark PRIVATE Duomec::AssemblyRelations Duomec::RuntimeInstrumentation)
   add_executable(duomec_large_assembly_baseline tests/benchmarks/large_assembly_baseline.cpp)

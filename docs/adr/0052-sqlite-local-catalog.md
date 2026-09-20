@@ -14,3 +14,9 @@ SQLite may index a local per-user cache and performance/LRU metadata. It is neve
 ## Consequences
 
 Transactional local lookup is available without assuming cross-host shared-memory semantics.
+
+## M5.1C implementation note
+
+The dependency-light build uses `InMemoryCacheCatalog`. The optional
+`DUOMEC_ENABLE_SQLITE_CACHE` adapter uses a local SQLite WAL database behind
+`ICacheCatalog`; no SQLite type enters a CAD/assembly domain API.

@@ -14,3 +14,9 @@ Authoritative local/NAS/synced files remain source truth. A disposable per-user 
 ## Consequences
 
 Unchanged remote content is fetched once while deleting the cache cannot destroy authored state.
+
+## M5.1C implementation note
+
+`LocalAssetCache` and `ICacheCatalog` are disposable and have no reference from
+the authoritative container manifests. Authoritative corruption remains an
+error; cache corruption becomes a miss.

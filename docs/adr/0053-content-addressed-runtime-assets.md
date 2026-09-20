@@ -14,3 +14,9 @@ Derived surface, edge, selection, proxy, and mass assets use keys composed from 
 ## Consequences
 
 Assets share across tabs, occurrences, sessions, and assemblies; policy changes cannot alias stale output.
+
+## M5.1C implementation note
+
+`CacheKey` combines asset kind, verified definition-level content hash, format
+version, generator version, and settings identity. Occurrence transform and
+visibility are intentionally excluded.

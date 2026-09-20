@@ -18,9 +18,11 @@ This dependency-light configuration exercises the domain transaction contract,
 including 20-step undo/redo and semantic save/reload through the in-memory test
 store. It does not masquerade as an OCAF integration test.
 
-Large-assembly development currently stops at M5.1A: reusable instrumentation,
-Chrome Trace export, and deterministic LA-01–LA-07 workload specifications. It
-does not yet contain an assembly runtime or make renderer-performance claims.
+Large-assembly development currently stops at M5.1C: reusable instrumentation,
+immutable definition/revision registries, a lightweight occurrence graph,
+chunked authoritative part/assembly containers, and a disposable local asset
+cache. It does not yet contain residency/scheduling or make renderer-performance
+claims.
 
 M5.2 Step 5.2.1 adds only the solver-neutral assembly-relation metadata
 foundation: lightweight absolute references, independent mobility/solve modes,
