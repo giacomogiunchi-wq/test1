@@ -8,8 +8,14 @@
 - [x] Default origin-aligned Fixed insertion without fake mates.
 - [x] Versioned persistence and regression tests.
 
+## Step 5.2.2 — standard constraints and manipulation
+
+- [x] Solver-owned interface and dependency-free baseline backend.
+- [x] Incremental solve islands and island-local drag requests.
+- [x] Standard/Insert relation semantics, Quick Mate state, manipulation, persistence, and history tests.
+
 ## Later steps
 
-- [ ] Step 5.2.2 and later relation solving, user workflows, and runtime integrations.
+- [ ] Step 5.2.3 and later component lifecycle, production UI, advanced/mechanical mates, and runtime integrations.
 
-Stop after Step 5.2.1 pending review.
+Stop after Step 5.2.2 pending review.

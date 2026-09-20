@@ -74,3 +74,9 @@ See [`docs/milestones/M4_PREFLIGHT.md`](docs/milestones/M4_PREFLIGHT.md),
 [`docs/architecture/m1-component-diagram.md`](docs/architecture/m1-component-diagram.md),
 [`docs/milestones/M1_CHECKLIST.md`](docs/milestones/M1_CHECKLIST.md), and
 [`docs/adr`](docs/adr).
+
+Step 5.2.2 adds the solver abstraction, incremental relation islands, standard
+relation semantics, descriptor-based Quick Mate controller state, and
+transform-only manipulation. The dependency-free native backend currently
+provides DOF/consistency classification rather than a general nonlinear
+geometric solve; see `docs/milestones/M5_2_2_REPORT.md`.

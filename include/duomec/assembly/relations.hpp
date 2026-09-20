@@ -165,7 +165,11 @@ enum class RelationType {
   Parallel,
   Perpendicular,
   Distance,
-  Angle
+  Angle,
+  Tangent,
+  Lock,
+  Frame,
+  Insert
 };
 enum class RelationState {
   Active,
@@ -210,7 +214,7 @@ struct OccurrenceState {
 };
 
 struct AssemblyRelationsSnapshot {
-  static constexpr std::uint32_t currentSchemaVersion = 1;
+  static constexpr std::uint32_t currentSchemaVersion = 2;
   std::uint32_t schemaVersion{currentSchemaVersion};
   std::vector<PartDefinitionMetadata> parts;
   std::vector<AssemblyDefinitionMetadata> assemblies;

@@ -314,7 +314,8 @@ core::Result<AssemblyRelationsSnapshot> deserialize(std::string_view bytes) {
       throw std::runtime_error("invalid assembly relation header");
     AssemblyRelationsSnapshot s;
     s.schemaVersion = r.pod<std::uint32_t>();
-    if (s.schemaVersion != AssemblyRelationsSnapshot::currentSchemaVersion)
+    if (s.schemaVersion == 0 ||
+        s.schemaVersion > AssemblyRelationsSnapshot::currentSchemaVersion)
       throw std::runtime_error("unsupported assembly relation schema");
     count(r, [&] {
       PartDefinitionMetadata p;
