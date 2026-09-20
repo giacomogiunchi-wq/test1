@@ -90,8 +90,10 @@ void MeshProcessingPipeline::invalidate_from(std::size_t index) {
         record.enabled ? ProcessingState::dirty : ProcessingState::suppressed;
   }
 }
-core::Result<bool> MeshProcessingPipeline::set_parameter(
-    DiscreteFeatureId feature, std::string key, ProcessingParameter value) {
+core::Result<bool>
+MeshProcessingPipeline::set_parameter(const DiscreteFeatureId &feature,
+                                      std::string key,
+                                      ProcessingParameter value) {
   if (key.empty())
     return core::Result<bool>::failure(
         history_error("processing parameter key must not be empty", {}));
@@ -107,7 +109,7 @@ core::Result<bool> MeshProcessingPipeline::set_parameter(
   return core::Result<bool>::success(true);
 }
 core::Result<bool>
-MeshProcessingPipeline::set_suppressed(DiscreteFeatureId feature,
+MeshProcessingPipeline::set_suppressed(const DiscreteFeatureId &feature,
                                        bool suppressed) {
   const auto item =
       std::ranges::find(features_, feature, [](const MeshFeature &entry) {
@@ -121,7 +123,7 @@ MeshProcessingPipeline::set_suppressed(DiscreteFeatureId feature,
   return core::Result<bool>::success(true);
 }
 core::Result<bool>
-MeshProcessingPipeline::accept_result(DiscreteFeatureId feature,
+MeshProcessingPipeline::accept_result(const DiscreteFeatureId &feature,
                                       DiscreteGeometryRevision output,
                                       std::string cache_key) {
   const auto item =
@@ -183,8 +185,10 @@ void PointCloudProcessingPipeline::invalidate_from(std::size_t index) {
         record.enabled ? ProcessingState::dirty : ProcessingState::suppressed;
   }
 }
-core::Result<bool> PointCloudProcessingPipeline::set_parameter(
-    DiscreteFeatureId feature, std::string key, ProcessingParameter value) {
+core::Result<bool>
+PointCloudProcessingPipeline::set_parameter(const DiscreteFeatureId &feature,
+                                            std::string key,
+                                            ProcessingParameter value) {
   if (key.empty())
     return core::Result<bool>::failure(
         history_error("processing parameter key must not be empty", {}));
@@ -200,7 +204,7 @@ core::Result<bool> PointCloudProcessingPipeline::set_parameter(
   return core::Result<bool>::success(true);
 }
 core::Result<bool>
-PointCloudProcessingPipeline::set_suppressed(DiscreteFeatureId feature,
+PointCloudProcessingPipeline::set_suppressed(const DiscreteFeatureId &feature,
                                              bool suppressed) {
   const auto item =
       std::ranges::find(features_, feature, [](const PointCloudFeature &entry) {
@@ -214,7 +218,7 @@ PointCloudProcessingPipeline::set_suppressed(DiscreteFeatureId feature,
   return core::Result<bool>::success(true);
 }
 core::Result<bool>
-PointCloudProcessingPipeline::accept_result(DiscreteFeatureId feature,
+PointCloudProcessingPipeline::accept_result(const DiscreteFeatureId &feature,
                                             DiscreteGeometryRevision output,
                                             std::string cache_key) {
   const auto item =

@@ -1,4 +1,5 @@
 /build*/
+/audit-*/
 /CMakeUserPresets.json
 *.user
 *.pyc

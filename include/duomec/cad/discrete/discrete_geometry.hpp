@@ -217,10 +217,11 @@ public:
   core::Result<DiscreteFeatureId> append(
       MeshOperation operation, std::string name,
       std::map<std::string, ProcessingParameter, std::less<>> parameters = {});
-  core::Result<bool> set_parameter(DiscreteFeatureId feature, std::string key,
-                                   ProcessingParameter value);
-  core::Result<bool> set_suppressed(DiscreteFeatureId feature, bool suppressed);
-  core::Result<bool> accept_result(DiscreteFeatureId feature,
+  core::Result<bool> set_parameter(const DiscreteFeatureId &feature,
+                                   std::string key, ProcessingParameter value);
+  core::Result<bool> set_suppressed(const DiscreteFeatureId &feature,
+                                    bool suppressed);
+  core::Result<bool> accept_result(const DiscreteFeatureId &feature,
                                    DiscreteGeometryRevision output,
                                    std::string cache_key);
   [[nodiscard]] const std::vector<MeshFeature> &features() const noexcept;
@@ -238,10 +239,11 @@ public:
   core::Result<DiscreteFeatureId> append(
       PointCloudOperation operation, std::string name,
       std::map<std::string, ProcessingParameter, std::less<>> parameters = {});
-  core::Result<bool> set_parameter(DiscreteFeatureId feature, std::string key,
-                                   ProcessingParameter value);
-  core::Result<bool> set_suppressed(DiscreteFeatureId feature, bool suppressed);
-  core::Result<bool> accept_result(DiscreteFeatureId feature,
+  core::Result<bool> set_parameter(const DiscreteFeatureId &feature,
+                                   std::string key, ProcessingParameter value);
+  core::Result<bool> set_suppressed(const DiscreteFeatureId &feature,
+                                    bool suppressed);
+  core::Result<bool> accept_result(const DiscreteFeatureId &feature,
                                    DiscreteGeometryRevision output,
                                    std::string cache_key);
   [[nodiscard]] const std::vector<PointCloudFeature> &features() const noexcept;

@@ -205,7 +205,7 @@ void FeaturePreviewSession::set_extent(ExtentDefinition extent) {
 }
 void FeaturePreviewSession::set_direction(DirectionDefinition direction) {
   if (!terminal()) {
-    context_.direction = std::move(direction);
+    context_.direction = direction;
     state_ = PreviewSessionState::editing;
   }
 }

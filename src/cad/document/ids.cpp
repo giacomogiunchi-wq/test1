@@ -23,9 +23,17 @@ bool valid_uuid(std::string_view value) {
 
 std::string make_uuid_v4() {
   std::array<unsigned char, 16> bytes{};
-  std::random_device source;
-  for (auto &byte : bytes)
-    byte = static_cast<unsigned char>(source());
+  thread_local std::mt19937_64 source = [] {
+    std::random_device entropy;
+    std::seed_seq seed{entropy(), entropy(), entropy(), entropy(),
+                       entropy(), entropy(), entropy(), entropy()};
+    return std::mt19937_64(seed);
+  }();
+  for (std::size_t offset = 0; offset < bytes.size(); offset += 8) {
+    const auto random = source();
+    for (std::size_t index = 0; index < 8; ++index)
+      bytes[offset + index] = static_cast<unsigned char>(random >> (index * 8));
+  }
   bytes[6] = static_cast<unsigned char>((bytes[6] & 0x0fU) | 0x40U);
   bytes[8] = static_cast<unsigned char>((bytes[8] & 0x3fU) | 0x80U);
   std::ostringstream stream;
@@ -70,5 +78,12 @@ template class PersistentId<MeshBodyIdTag>;
 template class PersistentId<PointCloudBodyIdTag>;
 template class PersistentId<DiscreteFeatureIdTag>;
 template class PersistentId<DiscreteRegionIdTag>;
+template class PersistentId<AssemblyRelationIdTag>;
+template class PersistentId<RelationEndpointIdTag>;
+template class PersistentId<KinematicFrameIdTag>;
+template class PersistentId<SolveIslandIdTag>;
+template class PersistentId<PartDefinitionIdTag>;
+template class PersistentId<AssemblyDefinitionIdTag>;
+template class PersistentId<OccurrenceIdTag>;
 
 } // namespace duomec::cad

@@ -22,6 +22,11 @@ Large-assembly development currently stops at M5.1A: reusable instrumentation,
 Chrome Trace export, and deterministic LA-01–LA-07 workload specifications. It
 does not yet contain an assembly runtime or make renderer-performance claims.
 
+M5.2 Step 5.2.1 adds only the solver-neutral assembly-relation metadata
+foundation: lightweight absolute references, independent mobility/solve modes,
+DOF reporting, compact geometry and local frames, future motion/FEM hints, and
+versioned persistence. It does not add mates, a solver, or assembly UI.
+
 ## Build the OCAF Milestone 1A integration
 
 With OCCT 8.x installed at the pinned integration baseline:
@@ -69,3 +74,29 @@ See [`docs/milestones/M4_PREFLIGHT.md`](docs/milestones/M4_PREFLIGHT.md),
 [`docs/architecture/m1-component-diagram.md`](docs/architecture/m1-component-diagram.md),
 [`docs/milestones/M1_CHECKLIST.md`](docs/milestones/M1_CHECKLIST.md), and
 [`docs/adr`](docs/adr).
+
+Step 5.2.2 adds the solver abstraction, incremental relation islands, standard
+relation semantics, descriptor-based Quick Mate controller state, and
+transform-only manipulation. The dependency-free native backend currently
+provides DOF/consistency classification rather than a general nonlinear
+geometric solve; see `docs/milestones/M5_2_2_REPORT.md`.
+
+Step 5.2.3 adds the metadata-only component lifecycle layer: default and
+interactive insertion, replacement diagnostics, embedded virtual definitions,
+atomic external extraction, hierarchy formation, copy-on-write independence,
+per-occurrence mobility/solve mode, Mate References, and smart-insertion state.
+It does not add advanced or mechanical mates.
+
+Step 5.2.4 completes the domain-owned advanced and mechanical relation
+vocabulary, localized structural diagnostics, explicit reference repair,
+metadata-only relation navigation, and confirmation-gated kinematic joint
+recognition. It does not implement multibody dynamics, FEM solving, or claim
+that the dependency-free structural backend is a production nonlinear solver;
+see `docs/milestones/M5_2_4_REPORT.md`.
+
+Step 5.2.5 adds explicit, scope-limited Motion and FEM compilation boundaries,
+review-required FEM candidates, separate analysis caches, reaction-frame
+validation, runtime invariants, and percentile hardening benchmarks. It creates
+no Project Chrono or FEM runtime objects during normal assembly work and does
+not implement time integration or structural solving. See
+`docs/milestones/M5_2_REPORT.md`.
