@@ -1,6 +1,7 @@
 #pragma once
 
 #include "duomec/assembly/constraint_runtime.hpp"
+#include "duomec/assembly/runtime_model.hpp"
 
 #include <filesystem>
 #include <set>
@@ -130,6 +131,11 @@ public:
           std::span<const cad::OccurrenceId> selected,
           const DefinitionId &replacement, bool replaceAllInstances,
           const ReplacementReferenceMapper &mapper = {}) const;
+  [[nodiscard]] core::Result<std::vector<InvalidationEvent>>
+  execute(AssemblyRuntimeGraph &graph,
+          std::span<const cad::OccurrenceId> selected,
+          const CommittedDefinitionRef &replacement,
+          bool replaceAllInstances) const;
 };
 
 class VirtualComponentCommands {
@@ -157,6 +163,9 @@ public:
   execute(AssemblyLifecycleSnapshot &snapshot,
           std::span<const cad::OccurrenceId> selected,
           DefinitionStorage targetStorage) const;
+  [[nodiscard]] core::Result<std::vector<CommittedDefinitionRef>>
+  execute(DefinitionRegistry &registry, AssemblyRuntimeGraph &graph,
+          std::span<const cad::OccurrenceId> selected) const;
 };
 
 core::Result<bool> setPlacementMobility(AssemblyLifecycleSnapshot &snapshot,

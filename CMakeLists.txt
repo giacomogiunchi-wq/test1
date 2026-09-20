@@ -55,6 +55,7 @@ duomec_enable_warnings(duomec_cad_document)
 add_library(duomec_assembly_relations
   src/assembly/relations.cpp
   src/assembly/constraint_runtime.cpp
+  src/assembly/runtime_model.cpp
   src/assembly/lifecycle.cpp
   src/assembly/advanced_relations.cpp
   src/assembly/analysis_compilers.cpp)
@@ -161,6 +162,9 @@ if(BUILD_TESTING AND DUOMEC_BUILD_TESTS)
   add_executable(duomec_assembly_lifecycle_tests tests/unit/assembly_lifecycle_tests.cpp)
   target_link_libraries(duomec_assembly_lifecycle_tests PRIVATE Duomec::AssemblyRelations)
   add_test(NAME duomec.assembly_lifecycle.unit COMMAND duomec_assembly_lifecycle_tests)
+  add_executable(duomec_assembly_runtime_model_tests tests/unit/assembly_runtime_model_tests.cpp)
+  target_link_libraries(duomec_assembly_runtime_model_tests PRIVATE Duomec::AssemblyRelations)
+  add_test(NAME duomec.assembly_runtime_model.unit COMMAND duomec_assembly_runtime_model_tests)
   add_executable(duomec_advanced_relations_tests tests/unit/advanced_relations_tests.cpp)
   target_link_libraries(duomec_advanced_relations_tests PRIVATE Duomec::AssemblyRelations)
   add_test(NAME duomec.advanced_relations.unit COMMAND duomec_advanced_relations_tests)
@@ -173,6 +177,8 @@ if(BUILD_TESTING AND DUOMEC_BUILD_TESTS)
   target_link_libraries(duomec_assembly_solver_benchmark PRIVATE Duomec::AssemblyRelations Duomec::RuntimeInstrumentation)
   add_executable(duomec_assembly_lifecycle_benchmark tests/benchmarks/assembly_lifecycle_benchmark.cpp)
   target_link_libraries(duomec_assembly_lifecycle_benchmark PRIVATE Duomec::AssemblyRelations Duomec::RuntimeInstrumentation)
+  add_executable(duomec_assembly_runtime_model_benchmark tests/benchmarks/assembly_runtime_model_benchmark.cpp)
+  target_link_libraries(duomec_assembly_runtime_model_benchmark PRIVATE Duomec::AssemblyRelations Duomec::RuntimeInstrumentation)
   add_executable(duomec_relation_diagnostics_benchmark tests/benchmarks/relation_diagnostics_benchmark.cpp)
   target_link_libraries(duomec_relation_diagnostics_benchmark PRIVATE Duomec::AssemblyRelations Duomec::RuntimeInstrumentation)
   add_executable(duomec_large_assembly_baseline tests/benchmarks/large_assembly_baseline.cpp)
