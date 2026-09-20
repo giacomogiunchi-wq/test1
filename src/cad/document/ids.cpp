@@ -83,7 +83,10 @@ template class PersistentId<RelationEndpointIdTag>;
 template class PersistentId<KinematicFrameIdTag>;
 template class PersistentId<SolveIslandIdTag>;
 template class PersistentId<PartDefinitionIdTag>;
+template class PersistentId<PartRevisionIdTag>;
+template class PersistentId<BodyRevisionIdTag>;
 template class PersistentId<AssemblyDefinitionIdTag>;
+template class PersistentId<AssemblyRevisionIdTag>;
 template class PersistentId<OccurrenceIdTag>;
 
 } // namespace duomec::cad

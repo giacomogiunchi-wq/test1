@@ -37,7 +37,10 @@ struct RelationEndpointIdTag;
 struct KinematicFrameIdTag;
 struct SolveIslandIdTag;
 struct PartDefinitionIdTag;
+struct PartRevisionIdTag;
+struct BodyRevisionIdTag;
 struct AssemblyDefinitionIdTag;
+struct AssemblyRevisionIdTag;
 struct OccurrenceIdTag;
 
 using DocumentId = PersistentId<DocumentIdTag>;
@@ -57,7 +60,10 @@ using RelationEndpointId = PersistentId<RelationEndpointIdTag>;
 using KinematicFrameId = PersistentId<KinematicFrameIdTag>;
 using SolveIslandId = PersistentId<SolveIslandIdTag>;
 using PartDefinitionId = PersistentId<PartDefinitionIdTag>;
+using PartRevisionId = PersistentId<PartRevisionIdTag>;
+using BodyRevisionId = PersistentId<BodyRevisionIdTag>;
 using AssemblyDefinitionId = PersistentId<AssemblyDefinitionIdTag>;
+using AssemblyRevisionId = PersistentId<AssemblyRevisionIdTag>;
 using OccurrenceId = PersistentId<OccurrenceIdTag>;
 
 extern template class PersistentId<DocumentIdTag>;
@@ -77,7 +83,10 @@ extern template class PersistentId<RelationEndpointIdTag>;
 extern template class PersistentId<KinematicFrameIdTag>;
 extern template class PersistentId<SolveIslandIdTag>;
 extern template class PersistentId<PartDefinitionIdTag>;
+extern template class PersistentId<PartRevisionIdTag>;
+extern template class PersistentId<BodyRevisionIdTag>;
 extern template class PersistentId<AssemblyDefinitionIdTag>;
+extern template class PersistentId<AssemblyRevisionIdTag>;
 extern template class PersistentId<OccurrenceIdTag>;
 
 } // namespace duomec::cad
