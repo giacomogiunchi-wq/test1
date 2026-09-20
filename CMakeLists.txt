@@ -55,7 +55,8 @@ add_library(duomec_assembly_relations
   src/assembly/relations.cpp
   src/assembly/constraint_runtime.cpp
   src/assembly/lifecycle.cpp
-  src/assembly/advanced_relations.cpp)
+  src/assembly/advanced_relations.cpp
+  src/assembly/analysis_compilers.cpp)
 add_library(Duomec::AssemblyRelations ALIAS duomec_assembly_relations)
 target_include_directories(duomec_assembly_relations PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_link_libraries(duomec_assembly_relations PUBLIC Duomec::CadDocument)
@@ -162,6 +163,11 @@ if(BUILD_TESTING AND DUOMEC_BUILD_TESTS)
   add_executable(duomec_advanced_relations_tests tests/unit/advanced_relations_tests.cpp)
   target_link_libraries(duomec_advanced_relations_tests PRIVATE Duomec::AssemblyRelations)
   add_test(NAME duomec.advanced_relations.unit COMMAND duomec_advanced_relations_tests)
+  add_executable(duomec_analysis_compilers_tests tests/unit/analysis_compilers_tests.cpp)
+  target_link_libraries(duomec_analysis_compilers_tests PRIVATE Duomec::AssemblyRelations)
+  add_test(NAME duomec.analysis_compilers.unit COMMAND duomec_analysis_compilers_tests)
+  add_executable(duomec_assembly_hardening_benchmark tests/benchmarks/assembly_hardening_benchmark.cpp)
+  target_link_libraries(duomec_assembly_hardening_benchmark PRIVATE Duomec::AssemblyRelations Duomec::RuntimeInstrumentation)
   add_executable(duomec_assembly_solver_benchmark tests/benchmarks/assembly_solver_benchmark.cpp)
   target_link_libraries(duomec_assembly_solver_benchmark PRIVATE Duomec::AssemblyRelations Duomec::RuntimeInstrumentation)
   add_executable(duomec_assembly_lifecycle_benchmark tests/benchmarks/assembly_lifecycle_benchmark.cpp)

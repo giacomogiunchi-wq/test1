@@ -30,8 +30,17 @@
 - [x] Metadata-only relation views/browser and confirmation-gated joint recognition.
 - [x] Persistence, history, closed-loop graph, regression tests, and diagnostics benchmark.
 
-## Later steps
+## Step 5.2.5 — analysis readiness and hardening
 
-- [ ] Production nonlinear backend, viewport glyph/overlay integration, multibody dynamics, and FEM conversion.
+- [x] Explicit Motion compiler/exporter interfaces and neutral semantic mapping.
+- [x] Review-required FEM candidate extraction with scoped geometry resolution.
+- [x] Separate scope-aware analysis caches and stable reaction frames.
+- [x] Runtime architectural assertions and percentile hardening benchmarks.
+- [x] Final M5.2 report and Motion/FEM handoff contracts.
 
-Stop after Step 5.2.4 pending review.
+## Deferred milestones
+
+- [ ] Production nonlinear backend and viewport integrations.
+- [ ] Full multibody dynamics and FEM model generation/solving.
+
+Milestone 5.2 stops after Step 5.2.5.

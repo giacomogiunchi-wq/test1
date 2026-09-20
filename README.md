@@ -93,3 +93,10 @@ metadata-only relation navigation, and confirmation-gated kinematic joint
 recognition. It does not implement multibody dynamics, FEM solving, or claim
 that the dependency-free structural backend is a production nonlinear solver;
 see `docs/milestones/M5_2_4_REPORT.md`.
+
+Step 5.2.5 adds explicit, scope-limited Motion and FEM compilation boundaries,
+review-required FEM candidates, separate analysis caches, reaction-frame
+validation, runtime invariants, and percentile hardening benchmarks. It creates
+no Project Chrono or FEM runtime objects during normal assembly work and does
+not implement time integration or structural solving. See
+`docs/milestones/M5_2_REPORT.md`.
