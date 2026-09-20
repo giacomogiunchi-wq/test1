@@ -65,6 +65,7 @@ std::size_t constrainedCount(const AssemblyRelation &relation) {
 std::string relationKey(const AssemblyRelation &relation,
                         bool includeParameters) {
   std::vector<std::string> ids;
+  ids.reserve(relation.endpoints.size());
   for (const auto &endpoint : relation.endpoints)
     ids.push_back(endpoint.occurrenceId.value() +
                   endpoint.topologyReferenceId.value());
@@ -212,6 +213,15 @@ AssemblyRelationGraph::add(const AssemblyRelation &relation) {
         touched.push_back(index);
     }
   std::sort(touched.begin(), touched.end());
+  if (touched.size() == 1) {
+    auto &island = islands_[touched.front()];
+    island.relations.insert(relation.id);
+    for (const auto &id : occurrences) {
+      island.occurrences.insert(id);
+      occurrenceIsland_.insert_or_assign(id, island.id);
+    }
+    return core::Result<cad::SolveIslandId>::success(island.id);
+  }
   SolveIsland merged;
   for (const auto &id : occurrences)
     merged.occurrences.insert(id);
@@ -281,6 +291,7 @@ AssemblyRelationGraph::islands() const noexcept {
 std::vector<AssemblyRelation>
 AssemblyRelationGraph::relationsFor(const SolveIsland &island) const {
   std::vector<AssemblyRelation> result;
+  result.reserve(island.relations.size());
   for (const auto &id : island.relations)
     result.push_back(relations_.at(id));
   return result;
@@ -357,7 +368,7 @@ MateCandidateEngine::candidates(const GeometryDescriptor &first,
   return {};
 }
 QuickMateController::QuickMateController(MateCandidateEngine engine)
-    : engine_(std::move(engine)) {}
+    : engine_(engine) {}
 const QuickMateOverlay &
 QuickMateController::begin(const RelationEndpoint &first,
                            const RelationEndpoint &second) {
@@ -409,9 +420,12 @@ const QuickMateOverlay &QuickMateController::overlay() const noexcept {
   return overlay_;
 }
 
-void ComponentManipulator::begin(std::vector<OccurrenceState> selection,
-                                 std::optional<Vector3> explicitPivot,
-                                 std::optional<Vector3> groupBoundsCenter) {
+// Parameter order mirrors the public API: explicit pivot takes precedence.
+void ComponentManipulator::begin(
+    std::vector<OccurrenceState>
+        selection, // NOLINT(bugprone-easily-swappable-parameters)
+    std::optional<Vector3> explicitPivot,
+    std::optional<Vector3> groupBoundsCenter) {
   original_ = std::move(selection);
   preview_ = original_;
   dragged_ = false;
@@ -522,7 +536,6 @@ void ConstrainedDragController::begin(
     std::vector<OccurrenceState> selection,
     std::span<const OccurrenceState> assemblyOccurrences,
     std::uint64_t revision) {
-  manipulator_.begin(selection);
   assemblyOccurrences_.assign(assemblyOccurrences.begin(),
                               assemblyOccurrences.end());
   inputRevision_ = currentRevision_ = revision;
@@ -538,6 +551,7 @@ void ConstrainedDragController::begin(
     }
   for (const auto &occurrence : selection)
     islandOccurrences_.insert(occurrence.id);
+  manipulator_.begin(std::move(selection));
 }
 SolveResult ConstrainedDragController::solve(SolveMode mode) {
   std::vector<OccurrenceState> local;

@@ -43,19 +43,19 @@ Dependency-light runner; microbenchmarks report microseconds. Results are baseli
 
 | Workflow | Median | p95 | p99 | Max |
 |---|---:|---:|---:|---:|
-| Many small islands | 6,838.55 | 8,473.42 | 8,473.42 | 8,473.42 |
-| One 300-occurrence island | 172,411 | 174,905 | 174,905 | 174,905 |
-| 5,000 relation diagnostics | 37,428.6 | 40,609.3 | 41,508.3 | 41,508.3 |
-| Quick Mate candidates | 0.199 | 0.261 | 0.415 | 4.303 |
-| Constrained-drag solve | 11.734 | 12.452 | 30.198 | 32.474 |
-| Flexible mode update | 0.497 | 0.560 | 0.615 | 4.804 |
-| Replace Component | 11.259 | 36.422 | 45.220 | 45.220 |
-| Create Subassembly | 552.338 | 597.108 | 611.172 | 611.172 |
-| Make Independent | 48.664 | 62.403 | 64.381 | 64.381 |
-| Origin/plane mate graph update | 39.082 | 47.876 | 58.391 | 59.785 |
-| Relation browser grouping | 240.835 | 262.682 | 264.770 | 264.770 |
+| Many small islands | 2,771.07 | 4,726.25 | 4,726.25 | 4,726.25 |
+| One 300-occurrence island | 4,683.31 | 5,054.97 | 5,054.97 | 5,054.97 |
+| 5,000 relation diagnostics | 34,144.7 | 37,988.5 | 39,513.0 | 39,513.0 |
+| Quick Mate candidates | 0.198 | 0.234 | 0.376 | 4.855 |
+| Constrained-drag solve | 10.987 | 12.167 | 29.579 | 39.528 |
+| Flexible mode update | 0.481 | 0.574 | 0.600 | 4.847 |
+| Replace Component | 11.796 | 28.487 | 49.052 | 49.052 |
+| Create Subassembly | 68.192 | 141.415 | 172.524 | 172.524 |
+| Make Independent | 24.532 | 41.289 | 55.979 | 55.979 |
+| Origin/plane mate graph update | 13.137 | 13.761 | 23.582 | 38.290 |
+| Relation browser grouping | 241.536 | 268.823 | 287.175 | 287.175 |
 
-The current graph rebuild algorithm is the dominant bottleneck for a single large island and needs an incremental connectivity structure before a production gate. The flexible-mode benchmark measures metadata transition only because flexible solve expansion requires a production numerical backend.
+Single-island insertion now updates the touched island in place; the 300-occurrence chain median improved from 172,411 µs to 4,683 µs. Multi-island merges and splits still rebuild affected connectivity and need larger production-corpus validation. The flexible-mode benchmark measures metadata transition only because flexible solve expansion requires a production numerical backend.
 
 ## Known limitations
 

@@ -5,7 +5,10 @@
 #include <filesystem>
 #include <iostream>
 #include <memory>
+#include <mutex>
+#include <set>
 #include <string>
+#include <thread>
 
 namespace {
 bool check(bool condition, const char *message) {
@@ -82,6 +85,23 @@ int main() {
   }
   ok &= check(!document->save("wrong-extension.cad").has_value(),
               "reject non-duomec extension");
+
+  std::set<std::string> concurrentIds;
+  std::mutex idsMutex;
+  std::vector<std::thread> generators;
+  for (int worker = 0; worker < 8; ++worker)
+    generators.emplace_back([&] {
+      std::vector<std::string> local;
+      local.reserve(2'000);
+      for (int index = 0; index < 2'000; ++index)
+        local.push_back(OccurrenceId::generate().value());
+      std::scoped_lock lock(idsMutex);
+      concurrentIds.insert(local.begin(), local.end());
+    });
+  for (auto &generator : generators)
+    generator.join();
+  ok &= check(concurrentIds.size() == 16'000,
+              "thread-local UUID generation remains collision-free");
   (void)first_parameter;
   return ok ? 0 : 1;
 }

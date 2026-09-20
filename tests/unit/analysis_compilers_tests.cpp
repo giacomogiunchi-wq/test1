@@ -66,6 +66,8 @@ int main() {
   assert(motion.value().entities.front().reactionFrames.size() == 2);
   motionCache.store("motion", scope, motion.value());
   assert(motionCache.size() == 1);
+  assert(motionCache.find("motion", "assembly-r42"));
+  assert(!motionCache.find("motion", "assembly-r43"));
 
   FemRelationHintExtractor extractor;
   const auto coincidentHint = extractor.extract(coincident);

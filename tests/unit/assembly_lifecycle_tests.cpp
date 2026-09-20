@@ -29,7 +29,12 @@ int main() {
   MateReferenceDefinition oldMate;
   oldMate.name = "Mount";
   oldMate.geometry.kind = GeometryKind::Plane;
+  oldMate.geometry.secondaryDirection = {0, 1, 0};
+  oldMate.geometry.secondaryRadius = 2.0;
+  oldMate.geometry.angleRadians = 0.25;
+  oldMate.geometry.samples = {{1, 2, 3}, {4, 5, 6}};
   oldPart.references.mateReferences.push_back(oldMate);
+  oldPart.references.descriptors.emplace(oldMate.reference, oldMate.geometry);
 
   auto newPart = virtuals.newPart("New Part");
   newPart.sharedAssets = oldPart.sharedAssets;
@@ -215,6 +220,31 @@ int main() {
   assert(loaded.value().relations == snapshot.relations);
   assert(loaded.value().relationOwners == snapshot.relationOwners);
   assert(loaded.value() == snapshot);
+  assert(loaded.value()
+             .definitions.front()
+             .references.mateReferences.front()
+             .geometry.samples == oldMate.geometry.samples);
+
+  // Schema 1 remains readable; schema 2 preserves the complete descriptor.
+  AssemblyLifecycleSnapshot legacy;
+  legacy.schemaVersion = 1;
+  legacy.definitions.push_back(virtuals.newPart("Legacy"));
+  const auto legacyLoaded = deserializeLifecycle(serializeLifecycle(legacy));
+  assert(legacyLoaded && legacyLoaded.value() == legacy);
+  auto corrupted = encoded;
+  const auto matesTag = corrupted.find("MATES ");
+  assert(matesTag != std::string::npos);
+  corrupted.replace(matesTag, 5, "WRONG");
+  assert(!deserializeLifecycle(corrupted));
+  assert(!deserializeLifecycle(encoded + "TRAILING"));
+
+  // Invalid selections are rejected before lifecycle mutation begins.
+  auto invalidLifecycle = snapshot;
+  const auto beforeInvalid = invalidLifecycle;
+  const std::array invalidSelection{duomec::cad::OccurrenceId::generate()};
+  assert(!independent.execute(invalidLifecycle, invalidSelection,
+                              DefinitionStorage::Virtual));
+  assert(invalidLifecycle == beforeInvalid);
   AssemblyLifecycleHistory history(snapshot);
   auto changed = snapshot;
   changed.occurrences.front().visible = true;

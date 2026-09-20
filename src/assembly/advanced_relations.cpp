@@ -20,6 +20,7 @@ AssemblyRelation relation(RelationType type,
 }
 std::string endpointKey(const AssemblyRelation &relation) {
   std::vector<std::string> values;
+  values.reserve(relation.endpoints.size());
   for (const auto &endpoint : relation.endpoints)
     values.push_back(endpoint.occurrenceId.value() + ":" +
                      endpoint.topologyReferenceId.value());

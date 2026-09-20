@@ -76,7 +76,7 @@ struct ComponentOccurrence {
 };
 
 struct AssemblyLifecycleSnapshot {
-  static constexpr std::uint32_t currentSchemaVersion = 1;
+  static constexpr std::uint32_t currentSchemaVersion = 2;
   std::uint32_t schemaVersion{currentSchemaVersion};
   std::vector<ComponentDefinition> definitions;
   std::vector<ComponentOccurrence> occurrences;
@@ -89,7 +89,7 @@ class InsertComponentCommand {
 public:
   [[nodiscard]] std::vector<ComponentOccurrence>
   insert(std::span<const DefinitionId> definitions,
-         std::optional<cad::OccurrenceId> parent,
+         const std::optional<cad::OccurrenceId> &parent,
          std::optional<Transform> explicitPose = std::nullopt) const;
 };
 
@@ -160,10 +160,10 @@ public:
 };
 
 core::Result<bool> setPlacementMobility(AssemblyLifecycleSnapshot &snapshot,
-                                        cad::OccurrenceId occurrence,
+                                        const cad::OccurrenceId &occurrence,
                                         PlacementMobility mobility);
 core::Result<bool> setSubassemblySolveMode(AssemblyLifecycleSnapshot &snapshot,
-                                           cad::OccurrenceId occurrence,
+                                           const cad::OccurrenceId &occurrence,
                                            SubassemblySolveMode mode);
 
 struct SmartInsertionPreview {
@@ -179,7 +179,7 @@ public:
           const RelationEndpoint &target,
           const MateReferenceDefinition &targetReference) const;
   core::Result<bool> commit(AssemblyLifecycleSnapshot &snapshot,
-                            cad::OccurrenceId occurrence,
+                            const cad::OccurrenceId &occurrence,
                             const SmartInsertionPreview &preview) const;
 };
 

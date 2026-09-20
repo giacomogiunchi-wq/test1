@@ -100,16 +100,41 @@ Vector3 readVector(std::istream &in) {
   in >> v.x >> v.y >> v.z;
   return v;
 }
+void writeGeometryDetails(std::ostream &out,
+                          const GeometryDescriptor &geometry) {
+  writeVector(out, geometry.secondaryDirection);
+  out << ' ' << geometry.secondaryRadius << ' ' << geometry.angleRadians << ' '
+      << geometry.samples.size();
+  for (const auto &sample : geometry.samples)
+    writeVector(out, sample);
+}
+void readGeometryDetails(std::istream &in, GeometryDescriptor &geometry) {
+  geometry.secondaryDirection = readVector(in);
+  std::size_t sampleCount{};
+  in >> geometry.secondaryRadius >> geometry.angleRadians >> sampleCount;
+  if (sampleCount > 1'000'000)
+    throw std::runtime_error("unreasonable geometry sample count");
+  geometry.samples.reserve(sampleCount);
+  for (std::size_t i = 0; i < sampleCount; ++i)
+    geometry.samples.push_back(readVector(in));
+}
 template <class Map>
 void writeStringMap(std::ostream &out, const char *tag, const Map &map) {
   out << tag << ' ' << map.size() << '\n';
   for (const auto &[k, v] : map)
     out << std::quoted(k) << ' ' << std::quoted(v) << '\n';
 }
-void readStringMap(std::istream &in,
+std::size_t readSectionCount(std::istream &in, std::string_view expected) {
+  std::string tag;
+  std::size_t count{};
+  if (!(in >> tag >> count) || tag != expected || count > 1'000'000)
+    throw std::runtime_error("invalid or unreasonable " +
+                             std::string(expected) + " section");
+  return count;
+}
+void readStringMap(std::istream &in, std::string_view expected,
                    std::map<std::string, std::string, std::less<>> &map) {
-  std::size_t n;
-  in >> n;
+  const auto n = readSectionCount(in, expected);
   for (std::size_t i = 0; i < n; ++i) {
     std::string k, v;
     in >> std::quoted(k) >> std::quoted(v);
@@ -120,7 +145,7 @@ void readStringMap(std::istream &in,
 
 std::vector<ComponentOccurrence>
 InsertComponentCommand::insert(std::span<const DefinitionId> definitions,
-                               std::optional<cad::OccurrenceId> parent,
+                               const std::optional<cad::OccurrenceId> &parent,
                                std::optional<Transform> explicitPose) const {
   std::vector<ComponentOccurrence> result;
   result.reserve(definitions.size());
@@ -198,6 +223,11 @@ core::Result<ReplacementReport> ReplaceComponentCommand::execute(
            id.value()});
     originals.push_back(occurrence->definition);
   }
+  for (const auto &definition : originals)
+    if (!findDefinition(snapshot, definition))
+      return core::Result<ReplacementReport>::failure(
+          {core::ErrorCode::invalid_argument, "source definition missing",
+           idText(definition)});
   ReplacementReport report;
   for (auto &occurrence : snapshot.occurrences) {
     bool chosen = std::find(selected.begin(), selected.end(),
@@ -211,7 +241,9 @@ core::Result<ReplacementReport> ReplaceComponentCommand::execute(
       continue;
     const auto *oldDefinition = findDefinition(snapshot, occurrence.definition);
     if (!oldDefinition)
-      continue;
+      return core::Result<ReplacementReport>::failure(
+          {core::ErrorCode::internal, "source definition disappeared",
+           idText(occurrence.definition)});
     for (auto &relation : snapshot.relations.relations) {
       ReferenceMigrationState state = ReferenceMigrationState::Resolved;
       bool affected = false;
@@ -370,6 +402,17 @@ core::Result<std::vector<DefinitionId>>
 MakeIndependentCommand::execute(AssemblyLifecycleSnapshot &snapshot,
                                 std::span<const cad::OccurrenceId> selected,
                                 DefinitionStorage storage) const {
+  for (const auto &id : selected) {
+    const auto *occurrence = findOccurrence(snapshot, id);
+    if (!occurrence)
+      return core::Result<std::vector<DefinitionId>>::failure(
+          {core::ErrorCode::invalid_argument, "occurrence missing",
+           id.value()});
+    if (!findDefinition(snapshot, occurrence->definition))
+      return core::Result<std::vector<DefinitionId>>::failure(
+          {core::ErrorCode::invalid_argument, "source definition missing",
+           idText(occurrence->definition)});
+  }
   std::vector<DefinitionId> result;
   for (const auto &id : selected) {
     auto *occurrence = findOccurrence(snapshot, id);
@@ -398,7 +441,7 @@ MakeIndependentCommand::execute(AssemblyLifecycleSnapshot &snapshot,
 }
 
 core::Result<bool> setPlacementMobility(AssemblyLifecycleSnapshot &s,
-                                        cad::OccurrenceId id,
+                                        const cad::OccurrenceId &id,
                                         PlacementMobility mobility) {
   auto *o = findOccurrence(s, id);
   if (!o)
@@ -411,7 +454,7 @@ core::Result<bool> setPlacementMobility(AssemblyLifecycleSnapshot &s,
   return core::Result<bool>::success(true);
 }
 core::Result<bool> setSubassemblySolveMode(AssemblyLifecycleSnapshot &s,
-                                           cad::OccurrenceId id,
+                                           const cad::OccurrenceId &id,
                                            SubassemblySolveMode mode) {
   auto *o = findOccurrence(s, id);
   if (!o)
@@ -450,7 +493,8 @@ SmartInsertionPreview SmartInsertionEngine::preview(
   return result;
 }
 core::Result<bool>
-SmartInsertionEngine::commit(AssemblyLifecycleSnapshot &s, cad::OccurrenceId id,
+SmartInsertionEngine::commit(AssemblyLifecycleSnapshot &s,
+                             const cad::OccurrenceId &id,
                              const SmartInsertionPreview &p) const {
   if (!p.compatible)
     return core::Result<bool>::failure({core::ErrorCode::invalid_argument,
@@ -531,7 +575,10 @@ std::string serializeLifecycle(const AssemblyLifecycleSnapshot &s) {
       out << ' ' << static_cast<int>(m.geometry.kind);
       writeVector(out, m.geometry.origin);
       writeVector(out, m.geometry.direction);
-      out << ' ' << m.geometry.radius << '\n';
+      out << ' ' << m.geometry.radius;
+      if (s.schemaVersion >= 2)
+        writeGeometryDetails(out, m.geometry);
+      out << '\n';
     }
     out << "NAMED " << d.references.namedReferences.size() << '\n';
     for (const auto &[name, id] : d.references.namedReferences)
@@ -541,7 +588,10 @@ std::string serializeLifecycle(const AssemblyLifecycleSnapshot &s) {
       out << std::quoted(id.value()) << ' ' << static_cast<int>(g.kind);
       writeVector(out, g.origin);
       writeVector(out, g.direction);
-      out << ' ' << g.radius << '\n';
+      out << ' ' << g.radius;
+      if (s.schemaVersion >= 2)
+        writeGeometryDetails(out, g);
+      out << '\n';
     }
     out << "SIGNATURES " << d.references.topologySignatures.size() << '\n';
     for (const auto &[id, signature] : d.references.topologySignatures)
@@ -591,13 +641,11 @@ deserializeLifecycle(std::string_view bytes) {
     std::string tag;
     AssemblyLifecycleSnapshot s;
     in >> tag >> s.schemaVersion;
-    if (tag != "DUOMEC_LIFECYCLE" || s.schemaVersion != 1)
+    if (tag != "DUOMEC_LIFECYCLE" || s.schemaVersion == 0 ||
+        s.schemaVersion > AssemblyLifecycleSnapshot::currentSchemaVersion)
       throw std::runtime_error("unsupported lifecycle schema");
-    std::size_t count;
-    in >> tag >> count;
-    if (tag != "DEFINITIONS")
-      throw std::runtime_error("definitions missing");
-    const auto definitionCount = count;
+    std::size_t count{};
+    const auto definitionCount = readSectionCount(in, "DEFINITIONS");
     for (std::size_t i = 0; i < definitionCount; ++i) {
       ComponentDefinition d;
       int kind, storage;
@@ -620,7 +668,7 @@ deserializeLifecycle(std::string_view bytes) {
         in >> std::quoted(value);
         r.referenceId = parseId<cad::TopologyReferenceId>(value);
       }
-      in >> tag >> count;
+      count = readSectionCount(in, "MATES");
       for (std::size_t j = 0; j < count; ++j) {
         MateReferenceDefinition m;
         int rank, relation, alignment, geometry;
@@ -641,16 +689,18 @@ deserializeLifecycle(std::string_view bytes) {
         m.geometry.origin = readVector(in);
         m.geometry.direction = readVector(in);
         in >> m.geometry.radius;
+        if (s.schemaVersion >= 2)
+          readGeometryDetails(in, m.geometry);
         d.references.mateReferences.push_back(std::move(m));
       }
-      in >> tag >> count;
+      count = readSectionCount(in, "NAMED");
       for (std::size_t j = 0; j < count; ++j) {
         std::string name, reference;
         in >> std::quoted(name) >> std::quoted(reference);
         d.references.namedReferences.emplace(
             std::move(name), parseId<cad::TopologyReferenceId>(reference));
       }
-      in >> tag >> count;
+      count = readSectionCount(in, "DESCRIPTORS");
       for (std::size_t j = 0; j < count; ++j) {
         std::string value;
         int kindValue;
@@ -660,30 +710,31 @@ deserializeLifecycle(std::string_view bytes) {
         g.origin = readVector(in);
         g.direction = readVector(in);
         in >> g.radius;
+        if (s.schemaVersion >= 2)
+          readGeometryDetails(in, g);
         d.references.descriptors.emplace(
             parseId<cad::TopologyReferenceId>(value), g);
       }
-      in >> tag >> count;
+      count = readSectionCount(in, "SIGNATURES");
       for (std::size_t j = 0; j < count; ++j) {
         std::string reference, signature;
         in >> std::quoted(reference) >> std::quoted(signature);
         d.references.topologySignatures.emplace(
             parseId<cad::TopologyReferenceId>(reference), std::move(signature));
       }
-      auto readStrings = [&](auto &values) {
-        in >> tag >> count;
+      auto readStrings = [&](std::string_view expected, auto &values) {
+        count = readSectionCount(in, expected);
         for (std::size_t j = 0; j < count; ++j) {
           std::string value;
           in >> std::quoted(value);
           values.push_back(std::move(value));
         }
       };
-      readStrings(d.authoring.featureHistory);
-      readStrings(d.authoring.bodies);
-      readStrings(d.authoring.materials);
-      in >> tag;
-      readStringMap(in, d.authoring.metadata);
-      in >> tag >> count;
+      readStrings("FEATURES", d.authoring.featureHistory);
+      readStrings("BODIES", d.authoring.bodies);
+      readStrings("MATERIALS", d.authoring.materials);
+      readStringMap(in, "METADATA", d.authoring.metadata);
+      count = readSectionCount(in, "CONTEXT");
       for (std::size_t j = 0; j < count; ++j) {
         std::string value;
         in >> std::quoted(value);
@@ -692,8 +743,7 @@ deserializeLifecycle(std::string_view bytes) {
       }
       s.definitions.push_back(std::move(d));
     }
-    in >> tag >> count;
-    const auto occurrenceCount = count;
+    const auto occurrenceCount = readSectionCount(in, "OCCURRENCES");
     for (std::size_t i = 0; i < occurrenceCount; ++i) {
       ComponentOccurrence o;
       std::string occurrence, definition, parent;
@@ -720,20 +770,20 @@ deserializeLifecycle(std::string_view bytes) {
                                  : DofState::floating();
       for (auto &v : o.placement.localTransform.matrix)
         in >> v;
-      in >> tag;
-      readStringMap(in, o.appearanceOverrides);
-      in >> tag;
-      readStringMap(in, o.metadata);
+      readStringMap(in, "APPEARANCE", o.appearanceOverrides);
+      readStringMap(in, "OCCMETA", o.metadata);
       s.occurrences.push_back(std::move(o));
     }
     std::string payload;
     in >> tag >> std::quoted(payload);
+    if (tag != "RELATIONS")
+      throw std::runtime_error("relations section missing");
     auto relations = deserialize(unhex(payload));
     if (!relations)
       return core::Result<AssemblyLifecycleSnapshot>::failure(
           relations.error());
     s.relations = relations.value();
-    in >> tag >> count;
+    count = readSectionCount(in, "OWNERS");
     for (std::size_t i = 0; i < count; ++i) {
       std::string relation, definition;
       in >> std::quoted(relation) >> std::quoted(definition);
@@ -742,6 +792,9 @@ deserializeLifecycle(std::string_view bytes) {
     }
     if (!in)
       throw std::runtime_error("invalid lifecycle data");
+    in >> std::ws;
+    if (!in.eof())
+      throw std::runtime_error("trailing lifecycle data");
     return core::Result<AssemblyLifecycleSnapshot>::success(std::move(s));
   } catch (const std::exception &e) {
     return core::Result<AssemblyLifecycleSnapshot>::failure(

@@ -46,7 +46,7 @@ core::Result<std::string> hash_file(const std::filesystem::path &path) {
     return core::Result<std::string>::failure(
         import_error("cannot hash imported asset", path));
   ContentHasher hasher;
-  std::array<char, 64 * 1024> buffer{};
+  std::array<char, std::size_t{64} * 1024> buffer{};
   while (input) {
     input.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
     hasher.update(std::string_view(buffer.data(),

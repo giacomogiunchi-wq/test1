@@ -112,7 +112,7 @@ core::Result<CompiledKinematicModel> OnDemandKinematicModelCompiler::compile(
     auto exported = exporter.exportRelation(relation);
     if (!exported)
       return core::Result<CompiledKinematicModel>::failure(exported.error());
-    result.entities.push_back(std::move(exported.value()));
+    result.entities.push_back(std::move(exported).value());
   }
   return core::Result<CompiledKinematicModel>::success(std::move(result));
 }
@@ -170,7 +170,7 @@ core::Result<CompiledFemHints> OnDemandAssemblyToFemCompiler::compile(
           resolver.resolve(endpoint.occurrenceId, endpoint.topologyReferenceId);
       if (!geometry)
         return core::Result<CompiledFemHints>::failure(geometry.error());
-      candidate->resolvedGeometry.push_back(std::move(geometry.value()));
+      candidate->resolvedGeometry.push_back(std::move(geometry).value());
     }
     result.candidates.push_back(std::move(*candidate));
   }

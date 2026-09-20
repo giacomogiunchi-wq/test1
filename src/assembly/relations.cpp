@@ -43,7 +43,9 @@ public:
     if (in_.size() < sizeof(T))
       throw std::runtime_error("truncated assembly relation data");
     T v;
-    std::memcpy(&v, in_.data(), sizeof(T));
+    // The explicit byte count is authoritative; this is not a C-string read.
+    std::memcpy(&v, in_.data(),
+                sizeof(T)); // NOLINT(bugprone-suspicious-stringview-data-usage)
     in_.remove_prefix(sizeof(T));
     return v;
   }
@@ -294,15 +296,17 @@ std::string serialize(const AssemblyRelationsSnapshot &s) {
     });
     enumeration(w, rel.state);
     writeDof(w, rel.dofState);
-    w.pod(static_cast<std::uint8_t>(rel.solveIsland.has_value()));
-    if (rel.solveIsland)
-      w.id(*rel.solveIsland);
-    writeMotion(w, rel.motion);
-    w.pod(static_cast<std::uint8_t>(rel.analysisHint.has_value()));
-    if (rel.analysisHint) {
-      enumeration(w, rel.analysisHint->kind);
-      w.string(rel.analysisHint->userNote);
-      w.pod(rel.analysisHint->explicitlyAccepted);
+    if (s.schemaVersion >= 2) {
+      w.pod(static_cast<std::uint8_t>(rel.solveIsland.has_value()));
+      if (rel.solveIsland)
+        w.id(*rel.solveIsland);
+      writeMotion(w, rel.motion);
+      w.pod(static_cast<std::uint8_t>(rel.analysisHint.has_value()));
+      if (rel.analysisHint) {
+        enumeration(w, rel.analysisHint->kind);
+        w.string(rel.analysisHint->userNote);
+        w.pod(rel.analysisHint->explicitlyAccepted);
+      }
     }
   });
   return w.take();
@@ -362,15 +366,17 @@ core::Result<AssemblyRelationsSnapshot> deserialize(std::string_view bytes) {
       });
       rel.state = enumeration<RelationState>(r);
       rel.dofState = readDof(r);
-      if (r.pod<std::uint8_t>())
-        rel.solveIsland = r.id<cad::SolveIslandId>();
-      rel.motion = readMotion(r);
-      if (r.pod<std::uint8_t>()) {
-        AnalysisRelationHint h;
-        h.kind = enumeration<AnalysisHintKind>(r);
-        h.userNote = r.string();
-        h.explicitlyAccepted = r.pod<bool>();
-        rel.analysisHint = std::move(h);
+      if (s.schemaVersion >= 2) {
+        if (r.pod<std::uint8_t>())
+          rel.solveIsland = r.id<cad::SolveIslandId>();
+        rel.motion = readMotion(r);
+        if (r.pod<std::uint8_t>()) {
+          AnalysisRelationHint h;
+          h.kind = enumeration<AnalysisHintKind>(r);
+          h.userNote = r.string();
+          h.explicitlyAccepted = r.pod<bool>();
+          rel.analysisHint = std::move(h);
+        }
       }
       s.relations.push_back(std::move(rel));
     });

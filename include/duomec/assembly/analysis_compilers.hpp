@@ -125,9 +125,13 @@ public:
 
 template <class Model> class AnalysisModelCache {
 public:
-  [[nodiscard]] const Model *find(std::string_view key) const {
+  [[nodiscard]] const Model *find(std::string_view key,
+                                  std::string_view sourceRevision) const {
     const auto found = models_.find(std::string(key));
-    return found == models_.end() ? nullptr : &found->second.model;
+    return found == models_.end() ||
+                   found->second.scope.revision != sourceRevision
+               ? nullptr
+               : &found->second.model;
   }
   void store(std::string key, AnalysisScope scope, Model model) {
     models_[std::move(key)] = {std::move(scope), std::move(model)};
